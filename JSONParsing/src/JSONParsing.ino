@@ -34,30 +34,24 @@ const String testRegisterString =
   "{\n"
   "  \"action\": \"update\",\n"
   "  \"sensorName\": \"Back gate\",\n"
-  "  \"onSensorClosed\": [\n"
-  "    {\n"
+  "  \"onSensorClosed\": {\n"
   "      \"action\": \"ActionNone\",\n"
   "      \"delayMin\": 0,\n"
   "      \"alertWhenActiveWindowStarts\": \"false\"\n"
-  "    }\n"
-  "  ],\n"
-  "  \"onSensorOpen\": [\n"
-  "    {\n"
+  "   },\n"
+  "  \"onSensorOpen\": {\n"
   "      \"action\": \"ActionDelay\",\n"
   "      \"delayMin\": 30,\n"
   "      \"alertWhenActiveWindowStarts\": \"true\"\n"
-  "    }\n"
-  "  ],\n"
-  "  \"alertWindow\": [\n"
-  "    {\n"
+  "   },\n"
+  "  \"alertWindow\": {\n"
   "      \"timeStart\": 18,\n"
   "      \"durationHours\": 12\n"
-  "    }\n"
-  "  ],\n"
-  "  \"alertParams\": [\n"
-  "    \"pushoverSound\": \"7\",\n"
-  "    \"pushoverPriority\": \"2\"\n"
-  "  ]\n"
+  "   },\n"
+  "  \"alertParams\": {\n"
+  "      \"pushoverSound\": \"7\",\n"
+  "      \"pushoverPriority\": \"2\"\n"
+  "  }\n"
   "}";
 
 // Global variables
@@ -121,76 +115,64 @@ void setup() {
             Serial.println((const char*)val.toString());
         } else if (name == "onSensorClosed") {
             Serial.println("onSensorClosed:");
-            JSONArrayIterator arrIter(val);
-            while (arrIter.next()) {
-                JSONObjectIterator entryIter(arrIter.value());
-                while (entryIter.next()) {
-                    JSONString ename = entryIter.name();
-                    JSONValue eval = entryIter.value();
-                    if (ename == "action") {
-                        Serial.print("  action: ");
-                        Serial.println((const char*)eval.toString());
-                    } else if (ename == "delayMin") {
-                        Serial.print("  delayMin: ");
-                        Serial.println(eval.toInt());
-                    } else if (ename == "alertWhenActiveWindowStarts") {
-                        Serial.print("  alertWhenActiveWindowStarts: ");
-                        Serial.println((const char*)eval.toString());
-                    }
+            JSONObjectIterator entryIter(val);
+            while (entryIter.next()) {
+                JSONString ename = entryIter.name();
+                JSONValue eval = entryIter.value();
+                if (ename == "action") {
+                    Serial.print("  action: ");
+                    Serial.println((const char*)eval.toString());
+                } else if (ename == "delayMin") {
+                    Serial.print("  delayMin: ");
+                    Serial.println(eval.toInt());
+                } else if (ename == "alertWhenActiveWindowStarts") {
+                    Serial.print("  alertWhenActiveWindowStarts: ");
+                    Serial.println((const char*)eval.toString());
                 }
             }
         } else if (name == "onSensorOpen") {
             Serial.println("onSensorOpen:");
-            JSONArrayIterator arrIter(val);
-            while (arrIter.next()) {
-                JSONObjectIterator entryIter(arrIter.value());
-                while (entryIter.next()) {
-                    JSONString ename = entryIter.name();
-                    JSONValue eval = entryIter.value();
-                    if (ename == "action") {
-                        Serial.print("  action: ");
-                        Serial.println((const char*)eval.toString());
-                    } else if (ename == "delayMin") {
-                        Serial.print("  delayMin: ");
-                        Serial.println(eval.toInt());
-                    } else if (ename == "alertWhenActiveWindowStarts") {
-                        Serial.print("  alertWhenActiveWindowStarts: ");
-                        Serial.println((const char*)eval.toString());
-                    }
+            JSONObjectIterator entryIter(val);
+            while (entryIter.next()) {
+                JSONString ename = entryIter.name();
+                JSONValue eval = entryIter.value();
+                if (ename == "action") {
+                    Serial.print("  action: ");
+                    Serial.println((const char*)eval.toString());
+                } else if (ename == "delayMin") {
+                    Serial.print("  delayMin: ");
+                    Serial.println(eval.toInt());
+                } else if (ename == "alertWhenActiveWindowStarts") {
+                    Serial.print("  alertWhenActiveWindowStarts: ");
+                    Serial.println((const char*)eval.toString());
                 }
             }
         } else if (name == "alertWindow") {
             Serial.println("alertWindow:");
-            JSONArrayIterator arrIter(val);
-            while (arrIter.next()) {
-                JSONObjectIterator entryIter(arrIter.value());
-                while (entryIter.next()) {
-                    JSONString ename = entryIter.name();
-                    JSONValue eval = entryIter.value();
-                    if (ename == "timeStart") {
-                        Serial.print("  timeStart: ");
-                        Serial.println(eval.toInt());
-                    } else if (ename == "durationHours") {
-                        Serial.print("  durationHours: ");
-                        Serial.println(eval.toInt());
-                    }
+            JSONObjectIterator entryIter(val);
+            while (entryIter.next()) {
+                JSONString ename = entryIter.name();
+                JSONValue eval = entryIter.value();
+                if (ename == "timeStart") {
+                    Serial.print("  timeStart: ");
+                    Serial.println(eval.toInt());
+                } else if (ename == "durationHours") {
+                    Serial.print("  durationHours: ");
+                    Serial.println(eval.toInt());
                 }
             }
         } else if (name == "alertParams") {
             Serial.println("alertParams:");
-            JSONArrayIterator arrIter(val);
-            while (arrIter.next()) {
-                JSONObjectIterator entryIter(arrIter.value());
-                while (entryIter.next()) {
-                    JSONString ename = entryIter.name();
-                    JSONValue eval = entryIter.value();
-                    if (ename == "pushoverSound") {
-                        Serial.print("  pushoverSound: ");
-                        Serial.println((const char*)eval.toString());
-                    } else if (ename == "pushoverPriority") {
-                        Serial.print("  pushoverPriority: ");
-                        Serial.println((const char*)eval.toString());
-                    }
+            JSONObjectIterator entryIter(val);
+            while (entryIter.next()) {
+                JSONString ename = entryIter.name();
+                JSONValue eval = entryIter.value();
+                if (ename == "pushoverSound") {
+                    Serial.print("  pushoverSound: ");
+                    Serial.println((const char*)eval.toString());
+                } else if (ename == "pushoverPriority") {
+                    Serial.print("  pushoverPriority: ");
+                    Serial.println((const char*)eval.toString());
                 }
             }
         }
