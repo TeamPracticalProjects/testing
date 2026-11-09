@@ -54,8 +54,84 @@ const String testRegisterString =
   "  }\n"
   "}";
 
+// Structure to hold parsed JSON data
+struct SensorRegister {
+    String action;
+    String sensorName;
+    String onSensorClosed_action;
+    int onSensorClosed_delayMin;
+    String onSensorClosed_alertWhenActiveWindowStarts;
+    String onSensorOpen_action;
+    int onSensorOpen_delayMin;
+    String onSensorOpen_alertWhenActiveWindowStarts;
+    int alertWindow_timeStart;
+    int alertWindow_durationHours;
+    String alertParams_pushoverSound;
+    String alertParams_pushoverPriority;
+};
+
 // Global variables
 int sensorSlot = 0;
+SensorRegister sensorReg;
+
+// Helper: populate the SensorRegister from the top-level JSON object
+void populateSensorRegister(JSONValue obj, SensorRegister& reg) {
+    JSONObjectIterator topIter(obj);
+    while (topIter.next()) {
+        JSONString name = topIter.name();
+        JSONValue val = topIter.value();
+
+        if (name == "action") {
+            reg.action = (const char*)val.toString();
+        } else if (name == "sensorName") {
+            reg.sensorName = (const char*)val.toString();
+        } else if (name == "onSensorClosed") {
+            JSONObjectIterator iter(val);
+            while (iter.next()) {
+                JSONString n = iter.name();
+                if (n == "action") {
+                    reg.onSensorClosed_action = (const char*)iter.value().toString();
+                } else if (n == "delayMin") {
+                    reg.onSensorClosed_delayMin = iter.value().toInt();
+                } else if (n == "alertWhenActiveWindowStarts") {
+                    reg.onSensorClosed_alertWhenActiveWindowStarts = (const char*)iter.value().toString();
+                }
+            }
+        } else if (name == "onSensorOpen") {
+            JSONObjectIterator iter(val);
+            while (iter.next()) {
+                JSONString n = iter.name();
+                if (n == "action") {
+                    reg.onSensorOpen_action = (const char*)iter.value().toString();
+                } else if (n == "delayMin") {
+                    reg.onSensorOpen_delayMin = iter.value().toInt();
+                } else if (n == "alertWhenActiveWindowStarts") {
+                    reg.onSensorOpen_alertWhenActiveWindowStarts = (const char*)iter.value().toString();
+                }
+            }
+        } else if (name == "alertWindow") {
+            JSONObjectIterator iter(val);
+            while (iter.next()) {
+                JSONString n = iter.name();
+                if (n == "timeStart") {
+                    reg.alertWindow_timeStart = iter.value().toInt();
+                } else if (n == "durationHours") {
+                    reg.alertWindow_durationHours = iter.value().toInt();
+                }
+            }
+        } else if (name == "alertParams") {
+            JSONObjectIterator iter(val);
+            while (iter.next()) {
+                JSONString n = iter.name();
+                if (n == "pushoverSound") {
+                    reg.alertParams_pushoverSound = (const char*)iter.value().toString();
+                } else if (n == "pushoverPriority") {
+                    reg.alertParams_pushoverPriority = (const char*)iter.value().toString();
+                }
+            }
+        }
+    }
+}
 
 // setup() runs once, when the device is first turned on
 void setup() {
@@ -90,93 +166,55 @@ void setup() {
     Serial.println(jsonStr);
     Serial.println();
 
-    JSONValue outerObj = JSONValue::parseCopy(jsonStr);
+    {
+        JSONValue outerObj = JSONValue::parseCopy(jsonStr);
 
-    if (!outerObj.isValid()) {
-        Serial.println("*** INVALID JSON ***");
-        return;
-    }
-
-    // Step 5: Access all values directly
-    Serial.println();
-    Serial.println("=== All values Parsed ===");
-
-    // Top-level scalars
-    JSONObjectIterator topIter(outerObj);
-    while (topIter.next()) {
-        JSONString name = topIter.name();
-        JSONValue val = topIter.value();
-
-        if (name == "action") {
-            Serial.print("action: ");
-            Serial.println((const char*)val.toString());
-        } else if (name == "sensorName") {
-            Serial.print("sensorName: ");
-            Serial.println((const char*)val.toString());
-        } else if (name == "onSensorClosed") {
-            Serial.println("onSensorClosed:");
-            JSONObjectIterator entryIter(val);
-            while (entryIter.next()) {
-                JSONString ename = entryIter.name();
-                JSONValue eval = entryIter.value();
-                if (ename == "action") {
-                    Serial.print("  action: ");
-                    Serial.println((const char*)eval.toString());
-                } else if (ename == "delayMin") {
-                    Serial.print("  delayMin: ");
-                    Serial.println(eval.toInt());
-                } else if (ename == "alertWhenActiveWindowStarts") {
-                    Serial.print("  alertWhenActiveWindowStarts: ");
-                    Serial.println((const char*)eval.toString());
-                }
-            }
-        } else if (name == "onSensorOpen") {
-            Serial.println("onSensorOpen:");
-            JSONObjectIterator entryIter(val);
-            while (entryIter.next()) {
-                JSONString ename = entryIter.name();
-                JSONValue eval = entryIter.value();
-                if (ename == "action") {
-                    Serial.print("  action: ");
-                    Serial.println((const char*)eval.toString());
-                } else if (ename == "delayMin") {
-                    Serial.print("  delayMin: ");
-                    Serial.println(eval.toInt());
-                } else if (ename == "alertWhenActiveWindowStarts") {
-                    Serial.print("  alertWhenActiveWindowStarts: ");
-                    Serial.println((const char*)eval.toString());
-                }
-            }
-        } else if (name == "alertWindow") {
-            Serial.println("alertWindow:");
-            JSONObjectIterator entryIter(val);
-            while (entryIter.next()) {
-                JSONString ename = entryIter.name();
-                JSONValue eval = entryIter.value();
-                if (ename == "timeStart") {
-                    Serial.print("  timeStart: ");
-                    Serial.println(eval.toInt());
-                } else if (ename == "durationHours") {
-                    Serial.print("  durationHours: ");
-                    Serial.println(eval.toInt());
-                }
-            }
-        } else if (name == "alertParams") {
-            Serial.println("alertParams:");
-            JSONObjectIterator entryIter(val);
-            while (entryIter.next()) {
-                JSONString ename = entryIter.name();
-                JSONValue eval = entryIter.value();
-                if (ename == "pushoverSound") {
-                    Serial.print("  pushoverSound: ");
-                    Serial.println((const char*)eval.toString());
-                } else if (ename == "pushoverPriority") {
-                    Serial.print("  pushoverPriority: ");
-                    Serial.println((const char*)eval.toString());
-                }
-            }
+        if (!outerObj.isValid()) {
+            Serial.println("*** INVALID JSON ***");
+            return;
         }
+
+        // Step 4: Populate the global struct from the JSON
+        populateSensorRegister(outerObj, sensorReg);
     }
+    // outerObj released here — scope ended
+
+    // Step 5: Print values from the global struct
+    Serial.println();
+    Serial.println("=== Values from struct ===");
+
+    Serial.print("action: ");
+    Serial.println(sensorReg.action);
+    Serial.print("sensorName: ");
+    Serial.println(sensorReg.sensorName);
+
+    Serial.println("onSensorClosed:");
+    Serial.print("  action: ");
+    Serial.println(sensorReg.onSensorClosed_action);
+    Serial.print("  delayMin: ");
+    Serial.println(sensorReg.onSensorClosed_delayMin);
+    Serial.print("  alertWhenActiveWindowStarts: ");
+    Serial.println(sensorReg.onSensorClosed_alertWhenActiveWindowStarts);
+
+    Serial.println("onSensorOpen:");
+    Serial.print("  action: ");
+    Serial.println(sensorReg.onSensorOpen_action);
+    Serial.print("  delayMin: ");
+    Serial.println(sensorReg.onSensorOpen_delayMin);
+    Serial.print("  alertWhenActiveWindowStarts: ");
+    Serial.println(sensorReg.onSensorOpen_alertWhenActiveWindowStarts);
+
+    Serial.println("alertWindow:");
+    Serial.print("  timeStart: ");
+    Serial.println(sensorReg.alertWindow_timeStart);
+    Serial.print("  durationHours: ");
+    Serial.println(sensorReg.alertWindow_durationHours);
+
+    Serial.println("alertParams:");
+    Serial.print("  pushoverSound: ");
+    Serial.println(sensorReg.alertParams_pushoverSound);
+    Serial.print("  pushoverPriority: ");
+    Serial.println(sensorReg.alertParams_pushoverPriority);
 
     Serial.println("=== Parsing complete ===");
 
