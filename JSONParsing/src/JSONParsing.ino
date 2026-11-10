@@ -249,6 +249,32 @@ String hubConfigToJson(const HubConfig& cfg) {
     return String(buf);
 }
 
+// Helper: create a hub status JSON from HubConfig and SensorRegister array
+String hubStatusToJson(const HubConfig& cfg, const SensorRegister* regs, int count) {
+    char buf[2048];
+    JSONBufferWriter writer(buf, sizeof(buf) - 1);
+
+    writer.beginObject();
+        writer.name("hubName").value(cfg.hubName);
+        writer.name("timeLocal").value(cfg.timeLocal);
+        writer.name("sensors").beginArray();
+            for (int i = 0; i < count; i++) {
+                if (regs[i].sensorName.length() == 0) continue;
+                writer.beginObject();
+                    writer.name("sensorLoRaAddress").value(0);   // not in SensorRegister
+                    writer.name("sensorName").value(regs[i].sensorName);
+                    writer.name("slotNumber").value(i);           // array index as slot number
+                    writer.name("currentState").value("unknown"); // not in SensorRegister
+                    writer.name("lastStateChangeTime").value(""); // not in SensorRegister
+                writer.endObject();
+            }
+        writer.endArray();
+    writer.endObject();
+
+    buf[writer.dataSize()] = '\0';
+    return String(buf);
+}
+
 // setup() runs once, when the device is first turned on
 void setup() {
     // Wait for USB serial to be ready before printing
@@ -381,6 +407,11 @@ void setup() {
     Serial.println();
     Serial.println("=== Hub config from struct ===");
     Serial.println(hubConfigToJson(hubCfg));
+
+    // --- Hub status test ---
+    Serial.println();
+    Serial.println("=== Hub status JSON ===");
+    Serial.println(hubStatusToJson(hubCfg, sensorRegs, MAX_SENSOR_REGISTERS));
 
 }   // end of setup()
 
