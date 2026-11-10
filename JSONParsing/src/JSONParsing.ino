@@ -70,9 +70,35 @@ struct SensorRegister {
     String alertParams_pushoverPriority;
 };
 
+// Hub config structure
+struct HubConfig {
+    String hubName;
+    String timeLocal;
+    int loRaNetwork;
+    String ownerEmail;
+    int uptimeHours;
+    String alertMethod_type;
+    String alertMethod_email;
+};
+
 // Global variables
 int sensorSlot = 0;
 SensorRegister sensorReg;
+HubConfig hubCfg;
+
+// Test string for hub config
+const String testHubConfigString =
+  "{\n"
+  "  \"hubName\": \"Jim's hub\",\n"
+  "  \"timeLocal\": \"20260319 15:16\",\n"
+  "  \"LoRaNetwork\": 12,\n"
+  "  \"ownerEmail\": \"youremail@yourprovider.com\",\n"
+  "  \"uptimeHours\": 43000,\n"
+  "  \"alertMethod\": {\n"
+  "      \"type\": \"pushover\",\n"
+  "      \"email\": \"xyz@pushover.com\"\n"
+  "  }\n"
+  "}";
 
 // Helper: populate the SensorRegister from the top-level JSON object
 void populateSensorRegister(JSONValue obj, SensorRegister& reg) {
@@ -169,6 +195,58 @@ String sensorRegisterToJson(const SensorRegister& reg) {
     return String(buf);
 }
 
+// Helper: populate HubConfig from a JSON object
+void populateHubConfig(JSONValue obj, HubConfig& cfg) {
+    JSONObjectIterator topIter(obj);
+    while (topIter.next()) {
+        JSONString name = topIter.name();
+        JSONValue val = topIter.value();
+
+        if (name == "hubName") {
+            cfg.hubName = (const char*)val.toString();
+        } else if (name == "timeLocal") {
+            cfg.timeLocal = (const char*)val.toString();
+        } else if (name == "LoRaNetwork") {
+            cfg.loRaNetwork = val.toInt();
+        } else if (name == "ownerEmail") {
+            cfg.ownerEmail = (const char*)val.toString();
+        } else if (name == "uptimeHours") {
+            cfg.uptimeHours = val.toInt();
+        } else if (name == "alertMethod") {
+            JSONObjectIterator iter(val);
+            while (iter.next()) {
+                JSONString n = iter.name();
+                if (n == "type") {
+                    cfg.alertMethod_type = (const char*)iter.value().toString();
+                } else if (n == "email") {
+                    cfg.alertMethod_email = (const char*)iter.value().toString();
+                }
+            }
+        }
+    }
+}
+
+// Helper: create a JSON string from a HubConfig
+String hubConfigToJson(const HubConfig& cfg) {
+    char buf[1024];
+    JSONBufferWriter writer(buf, sizeof(buf) - 1);
+
+    writer.beginObject();
+        writer.name("hubName").value(cfg.hubName);
+        writer.name("timeLocal").value(cfg.timeLocal);
+        writer.name("LoRaNetwork").value(cfg.loRaNetwork);
+        writer.name("ownerEmail").value(cfg.ownerEmail);
+        writer.name("uptimeHours").value(cfg.uptimeHours);
+        writer.name("alertMethod").beginObject();
+            writer.name("type").value(cfg.alertMethod_type);
+            writer.name("email").value(cfg.alertMethod_email);
+        writer.endObject();
+    writer.endObject();
+
+    buf[writer.dataSize()] = '\0';
+    return String(buf);
+}
+
 // setup() runs once, when the device is first turned on
 void setup() {
     // Wait for USB serial to be ready before printing
@@ -258,6 +336,44 @@ void setup() {
     Serial.println();
     Serial.println("=== JSON from struct ===");
     Serial.println(sensorRegisterToJson(sensorReg));
+
+    // --- Hub config test ---
+    Serial.println();
+    Serial.println("=== Hub config JSON ===");
+    Serial.println(testHubConfigString);
+
+    {
+        JSONValue hubObj = JSONValue::parseCopy(testHubConfigString);
+        if (!hubObj.isValid()) {
+            Serial.println("*** INVALID HUB JSON ***");
+            return;
+        }
+        populateHubConfig(hubObj, hubCfg);
+    }
+
+    // Print parsed hub config
+    Serial.println();
+    Serial.println("=== Hub config values ===");
+    Serial.print("hubName: ");
+    Serial.println(hubCfg.hubName);
+    Serial.print("timeLocal: ");
+    Serial.println(hubCfg.timeLocal);
+    Serial.print("LoRaNetwork: ");
+    Serial.println(hubCfg.loRaNetwork);
+    Serial.print("ownerEmail: ");
+    Serial.println(hubCfg.ownerEmail);
+    Serial.print("uptimeHours: ");
+    Serial.println(hubCfg.uptimeHours);
+    Serial.println("alertMethod:");
+    Serial.print("  type: ");
+    Serial.println(hubCfg.alertMethod_type);
+    Serial.print("  email: ");
+    Serial.println(hubCfg.alertMethod_email);
+
+    // Re-serialize hub config
+    Serial.println();
+    Serial.println("=== Hub config from struct ===");
+    Serial.println(hubConfigToJson(hubCfg));
 
 }   // end of setup()
 
