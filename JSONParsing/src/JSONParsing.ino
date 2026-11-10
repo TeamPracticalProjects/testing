@@ -133,6 +133,42 @@ void populateSensorRegister(JSONValue obj, SensorRegister& reg) {
     }
 }
 
+// Helper: create a JSON string from a SensorRegister
+String sensorRegisterToJson(const SensorRegister& reg) {
+    char buf[1024];
+    JSONBufferWriter writer(buf, sizeof(buf) - 1);
+
+    writer.beginObject();
+        writer.name("action").value(reg.action);
+        writer.name("sensorName").value(reg.sensorName);
+
+        writer.name("onSensorClosed").beginObject();
+            writer.name("action").value(reg.onSensorClosed_action);
+            writer.name("delayMin").value(reg.onSensorClosed_delayMin);
+            writer.name("alertWhenActiveWindowStarts").value(reg.onSensorClosed_alertWhenActiveWindowStarts);
+        writer.endObject();
+
+        writer.name("onSensorOpen").beginObject();
+            writer.name("action").value(reg.onSensorOpen_action);
+            writer.name("delayMin").value(reg.onSensorOpen_delayMin);
+            writer.name("alertWhenActiveWindowStarts").value(reg.onSensorOpen_alertWhenActiveWindowStarts);
+        writer.endObject();
+
+        writer.name("alertWindow").beginObject();
+            writer.name("timeStart").value(reg.alertWindow_timeStart);
+            writer.name("durationHours").value(reg.alertWindow_durationHours);
+        writer.endObject();
+
+        writer.name("alertParams").beginObject();
+            writer.name("pushoverSound").value(reg.alertParams_pushoverSound);
+            writer.name("pushoverPriority").value(reg.alertParams_pushoverPriority);
+        writer.endObject();
+    writer.endObject();
+
+    buf[writer.dataSize()] = '\0';
+    return String(buf);
+}
+
 // setup() runs once, when the device is first turned on
 void setup() {
     // Wait for USB serial to be ready before printing
@@ -217,6 +253,11 @@ void setup() {
     Serial.println(sensorReg.alertParams_pushoverPriority);
 
     Serial.println("=== Parsing complete ===");
+
+    // Step 6: Re-serialize the struct back to JSON
+    Serial.println();
+    Serial.println("=== JSON from struct ===");
+    Serial.println(sensorRegisterToJson(sensorReg));
 
 }   // end of setup()
 
