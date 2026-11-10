@@ -81,9 +81,11 @@ struct HubConfig {
     String alertMethod_email;
 };
 
+#define MAX_SENSOR_REGISTERS 5
+
 // Global variables
 int sensorSlot = 0;
-SensorRegister sensorReg;
+SensorRegister sensorRegs[MAX_SENSOR_REGISTERS];
 HubConfig hubCfg;
 
 // Test string for hub config
@@ -289,53 +291,58 @@ void setup() {
         }
 
         // Step 4: Populate the global struct from the JSON
-        populateSensorRegister(outerObj, sensorReg);
+        int idx = (sensorSlot >= 0 && sensorSlot < MAX_SENSOR_REGISTERS) ? sensorSlot : 0;
+        populateSensorRegister(outerObj, sensorRegs[idx]);
     }
     // outerObj released here — scope ended
 
     // Step 5: Print values from the global struct
     Serial.println();
-    Serial.println("=== Values from struct ===");
+    Serial.print("=== Values from struct [");
+    Serial.print(sensorSlot);
+    Serial.println("] ===");
+
+    SensorRegister& reg = sensorRegs[(sensorSlot >= 0 && sensorSlot < MAX_SENSOR_REGISTERS) ? sensorSlot : 0];
 
     Serial.print("action: ");
-    Serial.println(sensorReg.action);
+    Serial.println(reg.action);
     Serial.print("sensorName: ");
-    Serial.println(sensorReg.sensorName);
+    Serial.println(reg.sensorName);
 
     Serial.println("onSensorClosed:");
     Serial.print("  action: ");
-    Serial.println(sensorReg.onSensorClosed_action);
+    Serial.println(reg.onSensorClosed_action);
     Serial.print("  delayMin: ");
-    Serial.println(sensorReg.onSensorClosed_delayMin);
+    Serial.println(reg.onSensorClosed_delayMin);
     Serial.print("  alertWhenActiveWindowStarts: ");
-    Serial.println(sensorReg.onSensorClosed_alertWhenActiveWindowStarts);
+    Serial.println(reg.onSensorClosed_alertWhenActiveWindowStarts);
 
     Serial.println("onSensorOpen:");
     Serial.print("  action: ");
-    Serial.println(sensorReg.onSensorOpen_action);
+    Serial.println(reg.onSensorOpen_action);
     Serial.print("  delayMin: ");
-    Serial.println(sensorReg.onSensorOpen_delayMin);
+    Serial.println(reg.onSensorOpen_delayMin);
     Serial.print("  alertWhenActiveWindowStarts: ");
-    Serial.println(sensorReg.onSensorOpen_alertWhenActiveWindowStarts);
+    Serial.println(reg.onSensorOpen_alertWhenActiveWindowStarts);
 
     Serial.println("alertWindow:");
     Serial.print("  timeStart: ");
-    Serial.println(sensorReg.alertWindow_timeStart);
+    Serial.println(reg.alertWindow_timeStart);
     Serial.print("  durationHours: ");
-    Serial.println(sensorReg.alertWindow_durationHours);
+    Serial.println(reg.alertWindow_durationHours);
 
     Serial.println("alertParams:");
     Serial.print("  pushoverSound: ");
-    Serial.println(sensorReg.alertParams_pushoverSound);
+    Serial.println(reg.alertParams_pushoverSound);
     Serial.print("  pushoverPriority: ");
-    Serial.println(sensorReg.alertParams_pushoverPriority);
+    Serial.println(reg.alertParams_pushoverPriority);
 
     Serial.println("=== Parsing complete ===");
 
     // Step 6: Re-serialize the struct back to JSON
     Serial.println();
     Serial.println("=== JSON from struct ===");
-    Serial.println(sensorRegisterToJson(sensorReg));
+    Serial.println(sensorRegisterToJson(sensorRegs[(sensorSlot >= 0 && sensorSlot < MAX_SENSOR_REGISTERS) ? sensorSlot : 0]));
 
     // --- Hub config test ---
     Serial.println();
