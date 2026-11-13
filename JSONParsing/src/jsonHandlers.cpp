@@ -6,35 +6,35 @@ const String testRegisterString =
   "5,\n"
   "{\n"
   "  \"action\": \"update\",\n"
-  "  \"sensorName\": \"Back gate\",\n"
+  "  \"name\": \"Back gate\",\n"
   "  \"onSensorClosed\": {\n"
   "      \"action\": \"ActionNone\",\n"
   "      \"delayMin\": 0,\n"
-  "      \"alertWhenActiveWindowStarts\": \"false\"\n"
+  "      \"AWAWS\": \"false\"\n"
   "   },\n"
   "  \"onSensorOpen\": {\n"
   "      \"action\": \"ActionDelay\",\n"
   "      \"delayMin\": 30,\n"
-  "      \"alertWhenActiveWindowStarts\": \"true\"\n"
+  "      \"AWAWS\": \"true\"\n"
   "   },\n"
   "  \"alertWindow\": {\n"
   "      \"timeStart\": 18,\n"
-  "      \"durationHours\": 12\n"
+  "      \"durH\": 12\n"
   "   },\n"
   "  \"alertParams\": {\n"
-  "      \"pushoverSound\": \"7\",\n"
-  "      \"pushoverPriority\": \"2\"\n"
+  "      \"pshSnd\": \"7\",\n"
+  "      \"pshPri\": \"2\"\n"
   "  }\n"
   "}";
 
 // Test string for hub config
 const String testHubConfigString =
   "{\n"
-  "  \"hubName\": \"Jim's hub\",\n"
-  "  \"timeLocal\": \"20260319 15:16\",\n"
-  "  \"LoRaNetwork\": 12,\n"
-  "  \"ownerEmail\": \"youremail@yourprovider.com\",\n"
-  "  \"uptimeHours\": 43000,\n"
+  "  \"name\": \"Jim's hub\",\n"
+  "  \"time\": \"20260319 15:16\",\n"
+  "  \"network\": 12,\n"
+  "  \"owner\": \"youremail@yourprovider.com\",\n"
+  "  \"upHours\": 43000,\n"
   "  \"alertMethod\": {\n"
   "      \"type\": \"pushover\",\n"
   "      \"email\": \"xyz@pushover.com\"\n"
@@ -50,7 +50,7 @@ void populateSensorRegister(JSONValue obj, SensorRegister& reg) {
 
         if (name == "action") {
             reg.action = (const char*)val.toString();
-        } else if (name == "sensorName") {
+        } else if (name == "name") {
             reg.sensorName = (const char*)val.toString();
         } else if (name == "onSensorClosed") {
             JSONObjectIterator iter(val);
@@ -60,7 +60,7 @@ void populateSensorRegister(JSONValue obj, SensorRegister& reg) {
                     reg.onSensorClosed_action = (const char*)iter.value().toString();
                 } else if (n == "delayMin") {
                     reg.onSensorClosed_delayMin = iter.value().toInt();
-                } else if (n == "alertWhenActiveWindowStarts") {
+                } else if (n == "AWAWS") {
                     reg.onSensorClosed_alertWhenActiveWindowStarts = (const char*)iter.value().toString();
                 }
             }
@@ -72,7 +72,7 @@ void populateSensorRegister(JSONValue obj, SensorRegister& reg) {
                     reg.onSensorOpen_action = (const char*)iter.value().toString();
                 } else if (n == "delayMin") {
                     reg.onSensorOpen_delayMin = iter.value().toInt();
-                } else if (n == "alertWhenActiveWindowStarts") {
+                } else if (n == "AWAWS") {
                     reg.onSensorOpen_alertWhenActiveWindowStarts = (const char*)iter.value().toString();
                 }
             }
@@ -82,7 +82,7 @@ void populateSensorRegister(JSONValue obj, SensorRegister& reg) {
                 JSONString n = iter.name();
                 if (n == "timeStart") {
                     reg.alertWindow_timeStart = iter.value().toInt();
-                } else if (n == "durationHours") {
+                } else if (n == "durH") {
                     reg.alertWindow_durationHours = iter.value().toInt();
                 }
             }
@@ -90,9 +90,9 @@ void populateSensorRegister(JSONValue obj, SensorRegister& reg) {
             JSONObjectIterator iter(val);
             while (iter.next()) {
                 JSONString n = iter.name();
-                if (n == "pushoverSound") {
+                if (n == "pshSnd") {
                     reg.alertParams_pushoverSound = (const char*)iter.value().toString();
-                } else if (n == "pushoverPriority") {
+                } else if (n == "pshPri") {
                     reg.alertParams_pushoverPriority = (const char*)iter.value().toString();
                 }
             }
@@ -107,28 +107,28 @@ String sensorRegisterToJson(const SensorRegister& reg) {
 
     writer.beginObject();
         writer.name("action").value(reg.action);
-        writer.name("sensorName").value(reg.sensorName);
+        writer.name("name").value(reg.sensorName);
 
         writer.name("onSensorClosed").beginObject();
             writer.name("action").value(reg.onSensorClosed_action);
             writer.name("delayMin").value(reg.onSensorClosed_delayMin);
-            writer.name("alertWhenActiveWindowStarts").value(reg.onSensorClosed_alertWhenActiveWindowStarts);
+            writer.name("AWAWS").value(reg.onSensorClosed_alertWhenActiveWindowStarts);
         writer.endObject();
 
         writer.name("onSensorOpen").beginObject();
             writer.name("action").value(reg.onSensorOpen_action);
             writer.name("delayMin").value(reg.onSensorOpen_delayMin);
-            writer.name("alertWhenActiveWindowStarts").value(reg.onSensorOpen_alertWhenActiveWindowStarts);
+            writer.name("AWAWS").value(reg.onSensorOpen_alertWhenActiveWindowStarts);
         writer.endObject();
 
         writer.name("alertWindow").beginObject();
             writer.name("timeStart").value(reg.alertWindow_timeStart);
-            writer.name("durationHours").value(reg.alertWindow_durationHours);
+            writer.name("durH").value(reg.alertWindow_durationHours);
         writer.endObject();
 
         writer.name("alertParams").beginObject();
-            writer.name("pushoverSound").value(reg.alertParams_pushoverSound);
-            writer.name("pushoverPriority").value(reg.alertParams_pushoverPriority);
+            writer.name("pshSnd").value(reg.alertParams_pushoverSound);
+            writer.name("pshPri").value(reg.alertParams_pushoverPriority);
         writer.endObject();
     writer.endObject();
 
@@ -143,15 +143,15 @@ void populateHubConfig(JSONValue obj, HubConfig& cfg) {
         JSONString name = topIter.name();
         JSONValue val = topIter.value();
 
-        if (name == "hubName") {
+        if (name == "name") {
             cfg.hubName = (const char*)val.toString();
-        } else if (name == "timeLocal") {
+        } else if (name == "time") {
             cfg.timeLocal = (const char*)val.toString();
-        } else if (name == "LoRaNetwork") {
+        } else if (name == "network") {
             cfg.loRaNetwork = val.toInt();
-        } else if (name == "ownerEmail") {
+        } else if (name == "owner") {
             cfg.ownerEmail = (const char*)val.toString();
-        } else if (name == "uptimeHours") {
+        } else if (name == "upHours") {
             cfg.uptimeHours = val.toInt();
         } else if (name == "alertMethod") {
             JSONObjectIterator iter(val);
@@ -173,11 +173,11 @@ String hubConfigToJson(const HubConfig& cfg) {
     JSONBufferWriter writer(buf, sizeof(buf) - 1);
 
     writer.beginObject();
-        writer.name("hubName").value(cfg.hubName);
-        writer.name("timeLocal").value(cfg.timeLocal);
-        writer.name("LoRaNetwork").value(cfg.loRaNetwork);
-        writer.name("ownerEmail").value(cfg.ownerEmail);
-        writer.name("uptimeHours").value(cfg.uptimeHours);
+        writer.name("name").value(cfg.hubName);
+        writer.name("time").value(cfg.timeLocal);
+        writer.name("network").value(cfg.loRaNetwork);
+        writer.name("owner").value(cfg.ownerEmail);
+        writer.name("upHours").value(cfg.uptimeHours);
         writer.name("alertMethod").beginObject();
             writer.name("type").value(cfg.alertMethod_type);
             writer.name("email").value(cfg.alertMethod_email);
@@ -194,17 +194,17 @@ String hubStatusToJson(const HubConfig& cfg, const SensorRegister* regs, int cou
     JSONBufferWriter writer(buf, sizeof(buf) - 1);
 
     writer.beginObject();
-        writer.name("hubName").value(cfg.hubName);
-        writer.name("timeLocal").value(cfg.timeLocal);
+        writer.name("name").value(cfg.hubName);
+        writer.name("time").value(cfg.timeLocal);
         writer.name("sensors").beginArray();
             for (int i = 0; i < count; i++) {
                 if (regs[i].sensorName.length() == 0) continue;
                 writer.beginObject();
-                    writer.name("sensorLoRaAddress").value(0);
-                    writer.name("sensorName").value(regs[i].sensorName);
-                    writer.name("slotNumber").value(i);
-                    writer.name("currentState").value("unknown");
-                    writer.name("lastStateChangeTime").value("");
+                    writer.name("LoRa").value(0);
+                    writer.name("name").value(regs[i].sensorName);
+                    writer.name("slot").value(i);
+                    writer.name("state").value("unknown");
+                    writer.name("asOf").value("");
                 writer.endObject();
             }
         writer.endArray();
